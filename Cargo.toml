@@ -8,11 +8,11 @@ license = "GPL-2.0"
 build = "build.rs"
 
 [build-dependencies]
-serde_codegen = "0.8"
+serde_codegen = "0.9"
 
 [dependencies]
-chrono = "0.2"
-iron = "0.4"
-bodyparser = "0.4.1"
-serde_json = "0.8"
-serde = "0.8"
+chrono = "0.3"
+iron = "0.5"
+bodyparser = "0.6"
+serde_json = "0.9"
+serde = "0.9"
