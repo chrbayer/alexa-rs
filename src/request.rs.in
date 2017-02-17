@@ -4,6 +4,7 @@ use iron::prelude::Plugin;
 pub struct Request {
     pub session: Session,
     pub timestamp: DateTime<UTC>,
+    pub locale: String,
     pub body: RequestBody,
     pub request_id: String,
 }
@@ -35,6 +36,9 @@ impl Request {
             Ok(None) => Err("No request body"),
             Err(e) => { println!("{:?}",e); Err("Error reading / parsing request body")},
         }
+    }
+    pub fn locale(&self) -> &str {
+        &self.locale
     }
 }
 
@@ -72,6 +76,7 @@ struct RequestBodyInternal {
     request_type: RequestType,
     requestId: String,
     timestamp: String,
+    locale: String,
     intent: Option<IntentInternal>,
     reason: Option<Reason>,
 }
@@ -102,10 +107,11 @@ pub enum Reason {
 impl RequestInternal {
     fn into_request(self) -> Result<Request,&'static str> {
         let session = self.session;
-        let timestamp: DateTime<UTC> = match self.request.timestamp.parse(){
+        let timestamp: DateTime<UTC> = match self.request.timestamp.parse() {
             Ok(d) => d,
             Err(_) => { return Err("Could not parse timestamp"); }
         };
+        let locale = self.request.locale;
         let rbr: Result<RequestBody,&'static str> = match self.request.request_type {
             RequestType::LaunchRequest => {
                 Ok(RequestBody::LaunchRequest(LaunchRequest{}))
@@ -132,7 +138,7 @@ impl RequestInternal {
             }
         };
         if let Ok(rb) = rbr {
-            Ok(Request { session: session, timestamp: timestamp, body: rb, request_id: self.request.requestId })
+            Ok(Request { session: session, timestamp: timestamp, locale: locale, body: rb, request_id: self.request.requestId })
         } else {
             Err("?")
         }
