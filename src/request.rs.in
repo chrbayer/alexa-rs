@@ -39,6 +39,9 @@ impl Request {
     pub fn locale(&self) -> &str {
         &self.locale
     }
+    pub fn session_new(&self) -> bool {
+        self.session.new
+    }
 }
 
 #[derive(Deserialize,Clone)]
