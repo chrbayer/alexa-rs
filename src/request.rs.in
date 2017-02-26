@@ -96,7 +96,7 @@ struct IntentInternal {
 #[derive(Deserialize,Clone)]
 struct SlotInternal {
     name: String,
-    value: String,
+    value: Option<String>,
 }
 #[derive(Deserialize,Clone)]
 #[allow(non_camel_case_types)]
@@ -126,7 +126,9 @@ impl RequestInternal {
                 let mut normalized = BTreeMap::new();
                 if let Some(slots) = intent.slots {
                     for (k, v) in slots {
-                        normalized.insert(k,v.value);
+                        if let Some(value) = v.value {
+                            normalized.insert(k, value);
+                        }
                     }
                 }
                 Ok(RequestBody::IntentRequest(IntentRequest{name: intent.name, slots: normalized}))
