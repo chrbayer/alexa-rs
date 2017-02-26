@@ -1,8 +1,10 @@
 extern crate iron;
+extern crate bodyparser;
 extern crate alexa;
 use iron::prelude::*;
 
-struct RequestHandler{}
+struct RequestHandler;
+
 impl alexa::RequestHandler for RequestHandler {
     fn handle_request(&self, req: &alexa::Request) -> alexa::Response {
         match req.body {
@@ -48,9 +50,23 @@ fn i_dont_understand<'a>(locale: &str) -> alexa::Response<'a> {
             should_end_session: true,
         }
 }
+
+fn log_body(req: &mut Request) -> IronResult<()> {
+    let body = req.get::<bodyparser::Raw>();
+    match body {
+        Ok(Some(body)) => println!("Read body:\n{}", body),
+        Ok(None) => println!("No body"),
+        Err(err) => println!("Error: {:?}", err)
+    }
+
+    Ok(())
+}
+
+
 fn main() {
     let rh = RequestHandler{};
-    let ih = alexa::IronHandler::new("amzn1.ask.skill.a4c09e11-72b8-4b5d-a2dc-d674fa717f14".to_owned(),Box::new(rh));
-    let chain = Chain::new(ih);
+    let ih = alexa::IronHandler::new("amzn1.ask.skill.a4c09e11-72b8-4b5d-a2dc-d674fa717f14".to_owned(), Box::new(rh));
+    let mut chain = Chain::new(ih);
+    chain.link_before(log_body);
     Iron::new(chain).http("0.0.0.0:3000").unwrap();
 }
