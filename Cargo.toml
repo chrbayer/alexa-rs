@@ -16,3 +16,11 @@ iron = "0.5"
 bodyparser = "0.6"
 serde_json = "0.9"
 serde = "0.9"
+
+[profile.release]
+lto = true
+opt-level = "s"
+panic = 'abort'
+
+[profile.dev]
+codegen-units = 8
