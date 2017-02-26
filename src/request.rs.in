@@ -10,7 +10,7 @@ pub struct Request {
 }
 pub enum RequestBody {
     IntentRequest(IntentRequest),
-    LaunchRequest(LaunchRequest),
+    LaunchRequest,
     SessionEndedRequest(SessionEndedRequest),
 }
 #[derive(Debug)]
@@ -18,12 +18,11 @@ pub struct IntentRequest {
     pub name: String,
     pub slots: BTreeMap<String,String>,
 }
-pub struct LaunchRequest{}
 pub struct SessionEndedRequest{
     pub reason: Reason,
 }
 impl Request {
-    pub fn from(req: &mut iron::Request, app_id: &str) -> Result<Request,&'static str> {
+    pub fn from(req: &mut iron::Request, app_id: &str) -> Result<Request, &'static str> {
         let parsed = req.get::<bodyparser::Struct<RequestInternal>>();
         match parsed {
             Ok(Some(parsed)) => {
@@ -105,16 +104,16 @@ pub enum Reason {
 }
 
 impl RequestInternal {
-    fn into_request(self) -> Result<Request,&'static str> {
+    fn into_request(self) -> Result<Request, &'static str> {
         let session = self.session;
         let timestamp: DateTime<UTC> = match self.request.timestamp.parse() {
             Ok(d) => d,
             Err(_) => { return Err("Could not parse timestamp"); }
         };
         let locale = self.request.locale;
-        let rbr: Result<RequestBody,&'static str> = match self.request.request_type {
+        let rbr: Result<RequestBody, &'static str> = match self.request.request_type {
             RequestType::LaunchRequest => {
-                Ok(RequestBody::LaunchRequest(LaunchRequest{}))
+                Ok(RequestBody::LaunchRequest)
             },
             RequestType::IntentRequest => {
                 let intent = match self.request.intent {
@@ -122,7 +121,7 @@ impl RequestInternal {
                     None => { return Err("IntentRequest is missing an intent."); },
                 };
                 let mut normalized = BTreeMap::new();
-                if let Some(slots) = intent.slots{
+                if let Some(slots) = intent.slots {
                     for (k, v) in slots {
                         normalized.insert(k,v.value);
                     }
