@@ -20,6 +20,9 @@ impl alexa::RequestHandler for RequestHandler {
                             None => i_dont_understand(req.locale(), req.session_new()),
                         }
                     },
+                    "AMAZON.StopIntent" | "AMAZON.CancelIntent" => {
+                        goodbye(req.locale())
+                    },
                     _ => i_dont_understand(req.locale(), req.session_new()),
                 }
             },
@@ -56,6 +59,20 @@ fn doubled_number_response<'a>(num: f64, locale: &str, new_session: bool) -> ale
                 },
             should_end_session: new_session,
         }
+}
+
+fn goodbye<'a>(locale: &str) -> alexa::Response<'a> {
+    alexa::Response {
+        session_attributes: None,
+        card: None,
+        reprompt: None,
+        output_speech:
+        match locale {
+            "de-DE" => Some(alexa::OutputSpeech::Text("Verdoppler beendet.".into())),
+            _ => Some(alexa::OutputSpeech::Text("Good-bye".into())),
+        },
+        should_end_session: true,
+    }
 }
 
 fn session_ended<'a>() -> alexa::Response<'a> {
